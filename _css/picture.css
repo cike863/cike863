@@ -1,0 +1,18 @@
+.medium-zoom-image {
+    max-width: 80%;
+    height: auto;
+    cursor: pointer;
+}
+.markdown-section table{
+    width: 80%;
+    display: inline-table;
+}
+
+@media (max-width: 1024px) { 
+    .medium-zoom-image {
+        max-width: 100%;
+    }
+    .markdown-section table{
+        width: 100%;
+    }
+}
