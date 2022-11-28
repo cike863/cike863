@@ -1,12 +1,12 @@
-**本文主要基于 Spring 5.0.6.RELEASE**
+**本文主要基于 Spring 5.2.x.RELEASE**
 
 摘要: 原创出处 http://cmsblogs.com/?p=2652 「小明哥」，谢谢！
 
-作为「小明哥」的忠实读者，「老艿艿」略作修改，记录在理解过程中，参考的资料。
+作为「小明哥」的忠实读者，本文略作修改，记录在理解过程中，参考的资料。
 
 ------
 
-在一开始学习 Spring 的时候，我们就接触 IoC 了，作为 Spring 第一个最核心的概念，我们在解读它源码之前势必需要对其有深入的认识，本篇为【死磕 Spring】系列博客的第一篇博文，主要介绍 IoC 基本概念和各个组件。
+在一开始学习 Spring 的时候，我们就接触 IoC 了，作为 Spring 第一个最核心的概念，我们在解读它源码之前势必需要对其有深入的认识，本篇为spring源码系列博客的第一篇博文，主要介绍 IoC 基本概念和各个组件。
 
 # 1. IoC 理论
 
@@ -27,42 +27,27 @@ IoC 全称为 `Inversion of Control`，翻译为 “控制反转”，它还有�
 
 找女朋友，一般情况下我们是如何来找女朋友的呢？首先我们需要根据自己的需求（漂亮、身材好、性格好）找一个妹子，然后到处打听她的兴趣爱好、微信、电话号码，然后各种投其所好送其所要，最后追到手。如下：
 
-```
+```java
 /**
  * 年轻小伙子
  */
 public class YoungMan {
-
     private BeautifulGirl beautifulGirl;
-
     YoungMan(){
-
         // 可能你比较牛逼，指腹为婚
-
         // beautifulGirl = new BeautifulGirl();
-
     }
-
     public void setBeautifulGirl(BeautifulGirl beautifulGirl) {
-
         this.beautifulGirl = beautifulGirl;
-
     }
 
     public static void main(String[] args){
-
         YoungMan you = new YoungMan();
-
         BeautifulGirl beautifulGirl = new BeautifulGirl("你的各种条件");
-
         beautifulGirl.setxxx("各种投其所好");
-
         // 然后你有女票了
-
         you.setBeautifulGirl(beautifulGirl);
-
     }
-
 }
 ```
 
@@ -99,7 +84,7 @@ public class YoungMan {
 
 构造器注入，顾名思义就是被注入的对象通过在其构造方法中声明依赖对象的参数列表，让外部知道它需要哪些依赖对象。
 
-```
+```java
 YoungMan(BeautifulGirl beautifulGirl) {
     this.beautifulGirl = beautifulGirl;
 }
@@ -111,15 +96,12 @@ YoungMan(BeautifulGirl beautifulGirl) {
 
 对于 JavaBean 对象而言，我们一般都是通过 getter 和 setter 方法来访问和设置对象的属性。所以，当前对象只需要为其所依赖的对象提供相对应的 setter 方法，就可以通过该方法将相应的依赖对象设置到被注入对象中。如下：
 
-```
+```java
 public class YoungMan {
-
     private BeautifulGirl beautifulGirl;
-
     public void setBeautifulGirl(BeautifulGirl beautifulGirl) {
         this.beautifulGirl = beautifulGirl;
     }
-
 }
 ```
 
@@ -129,7 +111,7 @@ public class YoungMan {
 
 接口方式注入显得比较霸道，因为它需要被依赖的对象实现不必要的接口，带有侵入性。一般都不推荐这种方式。
 
-感兴趣的胖友，可以看看 [《依赖注入的三种实现形式 —— 接口注入（Interface Injection）》](http://wiki.jikexueyuan.com/project/spring-ioc/iocordi-1.html#6e5dfcd838f3a79e9129641785cf736f)
+可以看看 [《依赖注入的三种实现形式 —— 接口注入（Interface Injection）》](http://wiki.jikexueyuan.com/project/spring-ioc/iocordi-1.html#6e5dfcd838f3a79e9129641785cf736f)
 
 ## 1.2 推荐文章
 
@@ -151,7 +133,7 @@ public class YoungMan {
 
 ## 2.1 Resource 体系
 
-`org.springframework.core.io.Resource`，对资源的抽象。它的每一个实现类都代表了一种资源的访问策略，如 ClassPathResource、RLResource、FileSystemResource 等。
+`org.springframework.core.io.Resource`，对资源的抽象。它的每一个实现类都代表了一种资源的访问策略，如 ClassPathResource、UrlResource、FileSystemResource 等。
 
 [![Resource 类图](http://static.iocoder.cn/143162657d5f8c7cb7712d0996bf2a38)](http://static.iocoder.cn/143162657d5f8c7cb7712d0996bf2a38)Resource 类图
 
@@ -161,7 +143,7 @@ public class YoungMan {
 
 [![ResourceLoader 类图](http://static.iocoder.cn/2446cc9fba90605b691ea250cf340ebb)](http://static.iocoder.cn/2446cc9fba90605b691ea250cf340ebb)ResourceLoader 类图
 
-> 关于 Resource 和 ResourceLoader 的源码解析，见 [《【死磕 Spring】—— IoC 之 Spring 统一资源加载策略》](http://svip.iocoder.cn/Spring/IoC-load-Resource) 。
+> 关于 Resource 和 ResourceLoader 的源码解析，见 [《【死磕 Spring】—— IoC 之 Spring 统一资源加载策略》](http://svip.iocoder.cn/Spring/IoC-load-Resource) 
 
 ## 2.2 BeanFactory 体系
 
