@@ -1,0 +1,31 @@
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+target/
+
+# eclipse
+.settings/
+.classpath
+.project
+logs/
+temp/
+
+# idea
+.idea/
+*.iml
+
+#Mac
+.DS_Store
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.ipr
+
+*.log
+tmp/
+
+/.flattened-pom.xml
