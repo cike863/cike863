@@ -2,7 +2,7 @@
 
 摘要: 原创出处 http://cmsblogs.com/?p=2688 「小明哥」，谢谢！
 
-作为「小明哥」的忠实读者，「老艿艿」略作修改，记录在理解过程中，参考的资料。
+作为「小明哥」的忠实读者，略作修改，记录在理解过程中，参考的资料。
 
 ------
 
@@ -20,13 +20,11 @@
 
 ## 1.1 DTD
 
-> 老艿艿：因为一些胖友，可能没了解过 DTD 和 XSD ，所以本小节先做一个科普。
-
 DTD(Document Type Definition)，即文档类型定义，为 XML 文件的验证机制，属于 XML 文件中组成的一部分。DTD 是一种保证 XML 文档格式正确的有效验证方式，它定义了相关 XML 文档的元素、属性、排列方式、元素的内容类型以及元素的层次结构。其实 DTD 就相当于 XML 中的 “词汇”和“语法”，我们可以通过比较 XML 文件和 DTD 文件 来看文档是否符合规范，元素和标签使用是否正确。
 
 要在 Spring 中使用 DTD，需要在 Spring XML 文件头部声明：
 
-```
+```java
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN"  "http://www.springframework.org/dtd/spring-beans.dtd">
 ```
@@ -51,7 +49,7 @@ DTD 在一定的阶段推动了 XML 的发展，但是它本身存在着一些**
 
 # 2. getValidationModeForResource
 
-```
+```java
 // XmlBeanDefinitionReader.java
 
 // 禁用验证模式
@@ -90,7 +88,7 @@ protected int getValidationModeForResource(Resource resource) {
 
 - `<1>` 处，调用 `#getValidationMode()` 方法，获取指定的验证模式( `validationMode` )。如果有手动指定，则直接返回。另外，对对于 `validationMode` 属性的设置和获得的代码，代码如下：
 
-  ```
+  ```java
   public void setValidationMode(int validationMode) {
   	this.validationMode = validationMode;
   }
@@ -102,7 +100,7 @@ protected int getValidationModeForResource(Resource resource) {
 
 - `<2>` 处，调用 `#detectValidationMode(Resource resource)` 方法，自动获取验证模式。代码如下：
 
-  ```
+  ```java
     /**
      * XML 验证模式探测器
      */
@@ -147,7 +145,7 @@ protected int getValidationModeForResource(Resource resource) {
 
 `org.springframework.util.xml.XmlValidationModeDetector` ，XML 验证模式探测器。
 
-```
+```java
 public int detectValidationMode(InputStream inputStream) throws IOException {
     // Peek into the file to look for DOCTYPE.
     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -158,7 +156,7 @@ public int detectValidationMode(InputStream inputStream) throws IOException {
         // <0> 循环，逐行读取 XML 文件的内容
         while ((content = reader.readLine()) != null) {
             content = consumeCommentTokens(content);
-            // 跳过，如果是注释，或者
+            // 跳过，如果是注释，或者文本内容不存在
             if (this.inComment || !StringUtils.hasText(content)) {
                 continue;
             }
@@ -191,7 +189,7 @@ public int detectValidationMode(InputStream inputStream) throws IOException {
 
 - `<1>` 处，调用 `#hasDoctype(String content)` 方法，判断内容中如果包含有 `"DOCTYPE`“ ，则为 DTD 验证模式。代码如下：
 
-  ```
+  ```java
   /**
    * The token in a XML document that declares the DTD to use for validation
    * and thus that DTD validation is being used.
@@ -205,7 +203,7 @@ public int detectValidationMode(InputStream inputStream) throws IOException {
 
 - `<2>` 处，调用 `#hasOpeningTag(String content)` 方法，判断如果这一行包含 `<` ，并且 `<` 紧跟着的是字幕，则为 XSD 验证模式。代码如下：
 
-  ```
+  ```java
   /**
    * Does the supplied content contain an XML opening tag. If the parse state is currently
    * in an XML comment then this method always returns false. It is expected that all comment
@@ -226,7 +224,7 @@ public int detectValidationMode(InputStream inputStream) throws IOException {
 
 - 关于 `#consumeCommentTokens(String content)` 方法，代码比较复杂。感兴趣的胖友可以看看。代码如下：
 
-  ```
+  ```java
   /**
    * The token that indicates the start of an XML comment.
    */
@@ -298,6 +296,7 @@ public int detectValidationMode(InputStream inputStream) throws IOException {
     - [《spring源码（六）–XmlValidationModeDetector（获取xml文档校验模式）》](https://blog.csdn.net/ljz2016/article/details/82686884)
     - [《XmlValidationModeDetector》](https://my.oschina.net/u/3579120/blog/1532852)
 
-# 666. 彩蛋
+# 总结
 
 好了，XML 文件的验证模式分析完毕。下篇，我们来分析 `#doLoadBeanDefinitions(InputSource inputSource, Resource resource)` 方法的**第 2 个**步骤：获取 Document 实例。
+

@@ -2,27 +2,13 @@
 
 摘要: 原创出处 http://cmsblogs.com/?p=2695 「小明哥」，谢谢！
 
-作为「小明哥」的忠实读者，「老艿艿」略作修改，记录在理解过程中，参考的资料。
+作为「小明哥」的忠实读者，记录在理解过程中，参考的资料。
 
 ------
 
 在 `XmlBeanDefinitionReader#doLoadDocument(InputSource inputSource, Resource resource)` 方法，中做了两件事情：
 
-- 调用
-
-   
-
-  ```
-  #getValidationModeForResource(Resource resource)
-  ```
-
-   
-
-  方法，获取指定资源（xml）的
-
-  验证模式
-
-  。
+- 调用#getValidationModeForResource(Resource resource)方法，获取指定资源（xml）的验证模式
 
   - 上篇博客，我们已经详细解析。
 
@@ -30,7 +16,7 @@
 
    
 
-  ```
+  ```java
   DocumentLoader#loadDocument(InputSource inputSource, EntityResolver entityResolver, ErrorHandler errorHandler, int validationMode, boolean namespaceAware)
   ```
 
@@ -48,7 +34,7 @@
 >
 > 定义从资源文件加载到转换为 Document 的功能。
 
-```
+```java
 public interface DocumentLoader {
 
 	Document loadDocument(
@@ -69,7 +55,7 @@ public interface DocumentLoader {
 
 该方法由 DocumentLoader 的默认实现类 `org.springframework.beans.factory.xml.DefaultDocumentLoader` 实现。代码如下：
 
-```
+```java
 /**
  * Load the {@link Document} at the supplied {@link InputSource} using the standard JAXP-configured
  * XML parser.
@@ -91,7 +77,7 @@ public Document loadDocument(InputSource inputSource, EntityResolver entityResol
 
 - 首先，调用 #`createDocumentBuilderFactory(...)` 方法，创建 `javax.xml.parsers.DocumentBuilderFactory` 对象。代码如下：
 
-  ```
+  ```java
   /**
    * JAXP attribute used to configure the schema language for validation.
    */
@@ -130,7 +116,7 @@ public Document loadDocument(InputSource inputSource, EntityResolver entityResol
 
 - 然后，调用 `#createDocumentBuilder(DocumentBuilderFactory factory, EntityResolver entityResolver,ErrorHandler errorHandler)` 方法，创建 `javax.xml.parsers.DocumentBuilder` 对象。代码如下：
 
-  ```
+  ```java
   protected DocumentBuilder createDocumentBuilder(DocumentBuilderFactory factory,
   		@Nullable EntityResolver entityResolver, @Nullable ErrorHandler errorHandler)
   		throws ParserConfigurationException {
@@ -158,7 +144,7 @@ public Document loadDocument(InputSource inputSource, EntityResolver entityResol
 
 > `#getEntityResolver()` 方法，返回指定的解析器，如果没有指定，则构造一个未指定的默认解析器。
 
-```
+```java
 // XmlBeanDefinitionReader.java
 
 /**
@@ -190,7 +176,7 @@ protected EntityResolver getEntityResolver() {
 
 - `org.springframework.beans.factory.xm.BeansDtdResolver` ：实现 EntityResolver 接口，Spring Bean dtd 解码器，用来从 classpath 或者 jar 文件中加载 dtd 。部分代码如下：
 
-  ```
+  ```java
   private static final String DTD_EXTENSION = ".dtd";
   
   private static final String DTD_NAME = "spring-beans";
@@ -198,7 +184,7 @@ protected EntityResolver getEntityResolver() {
 
 - `org.springframework.beans.factory.xml.PluggableSchemaResolver` ，实现 EntityResolver 接口，读取 classpath 下的所有 `"META-INF/spring.schemas"` 成一个 namespaceURI 与 Schema 文件地址的 map 。代码如下：
 
-  ```
+  ```java
   /**
    * The location of the file that defines schema mappings.
    * Can be present in multiple JAR files.
@@ -222,7 +208,7 @@ protected EntityResolver getEntityResolver() {
 
 - `org.springframework.beans.factory.xml.DelegatingEntityResolver` ：实现 EntityResolver 接口，分别代理 dtd 的 BeansDtdResolver 和 xml schemas 的 PluggableSchemaResolver 。代码如下：
 
-  ```
+  ```java
   /** Suffix for DTD files. */
   public static final String DTD_SUFFIX = ".dtd";
   
@@ -250,7 +236,7 @@ protected EntityResolver getEntityResolver() {
 
 - `org.springframework.beans.factory.xml.ResourceEntityResolver` ：继承自 DelegatingEntityResolver 类，通过 ResourceLoader 来解析实体的引用。代码如下：
 
-  ```
+  ```java
   private final ResourceLoader resourceLoader;
   
   public ResourceEntityResolver(ResourceLoader resourceLoader) {
@@ -273,7 +259,7 @@ protected EntityResolver getEntityResolver() {
 
 `org.xml.sax.EntityResolver` 接口，代码如下：
 
-```
+```java
 public interface EntityResolver {
 
     public abstract InputSource resolveEntity (String publicId, String systemId)
@@ -302,7 +288,7 @@ public interface EntityResolver {
 
 我们知道在 Spring 中使用 DelegatingEntityResolver 为 EntityResolver 的实现类。`#resolveEntity(String publicId, String systemId)` 方法，实现如下：
 
-```
+```java
 @Override
 @Nullable
 public InputSource resolveEntity(String publicId, @Nullable String systemId) throws SAXException, IOException {
@@ -326,7 +312,7 @@ public InputSource resolveEntity(String publicId, @Nullable String systemId) thr
 
 BeansDtdResolver 的解析过程，代码如下：
 
-```
+```java
 /**
  * DTD 文件的后缀
  */
@@ -386,7 +372,7 @@ public InputSource resolveEntity(String publicId, @Nullable String systemId) thr
 
 PluggableSchemaResolver 的解析过程，代码如下:
 
-```
+```java
 @Nullable
 private final ClassLoader classLoader;
 
@@ -436,7 +422,7 @@ public InputSource resolveEntity(String publicId, @Nullable String systemId) thr
 
 - 首先调用 `#getSchemaMappings()` 方法，获取一个映射表(systemId 与其在本地的对照关系)。代码如下：
 
-  ```
+  ```java
   private Map<String, String> getSchemaMappings() {
       Map<String, String> schemaMappings = this.schemaMappings;
       // 双重检查锁，实现 schemaMappings 单例
@@ -478,7 +464,7 @@ public InputSource resolveEntity(String publicId, @Nullable String systemId) thr
 
 ResourceEntityResolver 的解析过程，代码如下:
 
-```
+```java
 private final ResourceLoader resourceLoader;
 
 @Override
@@ -542,7 +528,7 @@ public InputSource resolveEntity(String publicId, @Nullable String systemId) thr
 
 示例如下：
 
-```
+```java
 public class MyResolver implements EntityResolver {
 
     @Override
@@ -569,6 +555,6 @@ public class MyResolver implements EntityResolver {
 
 从上面的错误可以看到，是在进行文档验证时，无法根据声明找到 XSD 验证文件而导致无法进行 XML 文件验证。在 [《【死磕 Spring】—— IoC 之获取验证模型》](http://svip.iocoder.cn/Spring/IoC-Validation-Mode-For-Resource) 中讲到，如果要解析一个 XML 文件，SAX 首先会读取该 XML 文档上的声明，然后根据声明去寻找相应的 DTD 定义，以便对文档进行验证。**默认的加载规则是通过网络方式下载验证文件**，而在实际生产环境中我们会遇到网络中断或者不可用状态，那么就应用就会因为无法下载验证文件而报错。
 
-# 666. 彩蛋
+# 总结
 
 是不是看到此处，有点懵逼，不是说好了分享**获取 Document 对象**，结果内容主要是 EntityResolver 呢？因为，从 XML 中获取 Document 对象，已经有 `javax.xml` 库进行解析。而 EntityResolver 的重点，是在于如何获取【验证文件】，从而验证用户写的 XML 是否通过验证。

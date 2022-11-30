@@ -2,13 +2,13 @@
 
 摘要: 原创出处 http://cmsblogs.com/?p=2697 「小明哥」，谢谢！
 
-作为「小明哥」的忠实读者，「老艿艿」略作修改，记录在理解过程中，参考的资料。
+作为「小明哥」的忠实读者，略作修改，记录在理解过程中，参考的资料。
 
 ------
 
 获取 XML Document 对象后，会根据该对象和 Resource 资源对象调用 `XmlBeanDefinitionReader#registerBeanDefinitions(Document doc, Resource resource)` 方法，开始注册 BeanDefinitions 之旅。代码如下：
 
-```
+```java
 // AbstractBeanDefinitionReader.java
 private final BeanDefinitionRegistry registry;
 
@@ -41,7 +41,7 @@ public int registerBeanDefinitions(Document doc, Resource resource) throws BeanD
 
 `#createBeanDefinitionDocumentReader()`，实例化 BeanDefinitionDocumentReader 对象。代码如下：
 
-```
+```java
 /**
  * documentReader 的类
  *
@@ -60,7 +60,7 @@ protected BeanDefinitionDocumentReader createBeanDefinitionDocumentReader() {
 
 `BeanDefinitionDocumentReader#registerBeanDefinitions(Document doc, XmlReaderContext readerContext)` 方法，注册 BeanDefinition ，在接口 BeanDefinitionDocumentReader 中定义。代码如下：
 
-```
+```java
 public interface BeanDefinitionDocumentReader {
 
 	/**
@@ -88,7 +88,7 @@ BeanDefinitionDocumentReader 有且只有一个默认实现类 DefaultBeanDefini
 
 DefaultBeanDefinitionDocumentReader 对该方法提供了实现：
 
-```
+```java
 @Nullable
 private XmlReaderContext readerContext;
 
@@ -163,7 +163,7 @@ protected void doRegisterBeanDefinitions(Element root) {
   >
   > 定义解析 XML Element 的各种方法
 
-  ```
+  ```java
   protected BeanDefinitionParserDelegate createDelegate(
           XmlReaderContext readerContext, Element root, @Nullable BeanDefinitionParserDelegate parentDelegate) {
       // 创建 BeanDefinitionParserDelegate 对象
@@ -184,7 +184,7 @@ protected void doRegisterBeanDefinitions(Element root) {
 
 - `<3>` / `<5>` 处，解析**前后**的处理，目前这两个方法都是空实现，交由子类来实现。代码如下：
 
-  ```
+  ```java
   protected void preProcessXml(Element root) {}
   
   protected void postProcessXml(Element root) {}
@@ -194,7 +194,7 @@ protected void doRegisterBeanDefinitions(Element root) {
 
 `#parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate)` 方法，进行解析逻辑。代码如下：
 
-```
+```java
 /**
  * Parse the elements at the root level in the document:
  * "import", "alias", "bean".
@@ -225,20 +225,14 @@ protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate d
 }
 ```
 
-- Spring 有
-
-  两种
-
-   
-
-  Bean 声明方式：
+- Spring 有两种Bean 声明方式：
 
   - 配置文件式声明：`<bean id="studentService" class="org.springframework.core.StudentService" />` 。对应 `<1>` 处。
   - 自定义注解方式：`<tx:annotation-driven>` 。对应 `<2>` 处。
-
+  
 - `<1>` 处，如果**根**节点或**子**节点**使用**默认命名空间，调用 `#parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate)` 方法，执行默认解析。代码如下：
 
-  ```
+  ```java
   private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
   	if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) { // import
   		importBeanDefinitionResource(ele);
@@ -261,7 +255,7 @@ protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate d
 
 `#createReaderContext(Resource resource)` 方法，创建 XmlReaderContext 对象。代码如下：
 
-```
+```java
 private ProblemReporter problemReporter = new FailFastProblemReporter();
 
 private ReaderEventListener eventListener = new EmptyReaderEventListener();
@@ -300,7 +294,7 @@ BeanDefinitionRegistry 继承了 AliasRegistry 接口，其核心子类有三个
 
 **用于别名管理的通用型接口，作为 BeanDefinitionRegistry 的顶层接口。** AliasRegistry 定义了一些别名管理的方法。
 
-```
+```java
 // AliasRegistry.java
 
 public interface AliasRegistry {
@@ -320,7 +314,7 @@ public interface AliasRegistry {
 
 BeanDefinitionRegistry 接口定义了关于 BeanDefinition 注册、注销、查询等一系列的操作。
 
-```
+```java
 // BeanDefinitionRegistry.java
 
     public interface BeanDefinitionRegistry extends AliasRegistry {
@@ -355,7 +349,7 @@ BeanDefinitionRegistry 接口定义了关于 BeanDefinition 注册、注销、�
 
 SimpleBeanDefinitionRegistry 使用 ConcurrentHashMap 来存储注册的 BeanDefinition。
 
-```
+```java
 // SimpleBeanDefinitionRegistry.java
 
 private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(64);
@@ -363,7 +357,7 @@ private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHash
 
 他对注册其中的 BeanDefinition 都是基于 `beanDefinitionMap` 这个集合来实现的，如下：
 
-```
+```java
 // SimpleBeanDefinitionRegistry.java
 
 @Override
@@ -397,7 +391,7 @@ public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefini
 
 **DefaultListableBeanFactory，ConfigurableListableBeanFactory（其实就是 BeanFactory ） 和 BeanDefinitionRegistry 接口的默认实现：一个基于 BeanDefinition 元数据的完整 bean 工厂**。所以相对于 SimpleBeanDefinitionRegistry 而言，DefaultListableBeanFactory 则是一个具有注册功能的完整 Bean 工厂。它同样是用 ConcurrentHashMap 数据结构来存储注册的 BeanDefinition 。
 
-```
+```java
 // DefaultListableBeanFactory.java
 
 // 注册表，由 BeanDefinition 的标识 （beanName） 与其实例组成
@@ -411,7 +405,7 @@ private final List<String> beanDefinitionNames = new ArrayList<String>(64);
 
 在看看 `#registerBeanDefinition(String beanName, BeanDefinition beanDefinition)` 方法，代码如下：
 
-```
+```java
 // DefaultListableBeanFactory.java
 
 public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
@@ -463,7 +457,7 @@ public void registerBeanDefinition(String beanName, BeanDefinition beanDefinitio
 
 - 其实上面一堆代码最重要就只有一句，就是 `<x>` 处：
 
-  ```
+  ```java
   // DefaultListableBeanFactory.java
   
   this.beanDefinitionMap.put(beanName, beanDefinition);
@@ -477,7 +471,7 @@ public void registerBeanDefinition(String beanName, BeanDefinition beanDefinitio
 
 对于类 GenericApplicationContext ，查看源码你会发现他实现注册、注销功能都是委托 DefaultListableBeanFactory 实现的。简化代码如下：
 
-```
+```java
 // GenericApplicationContext.java
 
 private final DefaultListableBeanFactory beanFactory;

@@ -2,13 +2,13 @@
 
 摘要: 原创出处 http://cmsblogs.com/?p=2658 「小明哥」，谢谢！
 
-作为「小明哥」的忠实读者，「老艿艿」略作修改，记录在理解过程中，参考的资料。
+作为「小明哥」的忠实读者，略作修改，记录在理解过程中，参考的资料。
 
 ------
 
 先看一段熟悉的代码：
 
-```
+```java
 ClassPathResource resource = new ClassPathResource("bean.xml"); // <1>
 DefaultListableBeanFactory factory = new DefaultListableBeanFactory(); // <2>
 XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory); // <3>
@@ -44,15 +44,13 @@ reader.loadBeanDefinitions(resource); // <4>
   - 在这里需要注意的一点是这个过程并没有完成依赖注入（Bean 创建），Bean 创建是发生在应用第一次调用 `#getBean(...)` 方法，向容器索要 Bean 时。
   - 当然我们可以通过设置预处理，即对某个 Bean 设置 `lazyinit = false` 属性，那么这个 Bean 的依赖注入就会在容器初始化的时候完成。
 
-> FROM 老艿艿
->
 > 简单的说，上面步骤的结果是，XML Resource => XML Document => Bean Definition 。
 
 # 1. loadBeanDefinitions
 
 资源定位在前面已经分析了，下面我们直接分析**加载**，上面看到的 `reader.loadBeanDefinitions(resource)` 代码，才是加载资源的真正实现，所以我们直接从该方法入手。代码如下：
 
-```
+```java
 // XmlBeanDefinitionReader.java
 @Override
 public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
@@ -63,7 +61,7 @@ public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreExce
 - 从指定的 xml 文件加载 Bean Definition ，这里会先对 Resource 资源封装成 `org.springframework.core.io.support.EncodedResource` 对象。这里为什么需要将 Resource 封装成 EncodedResource 呢？主要是为了对 Resource 进行编码，保证内容读取的正确性。
 - 然后，再调用 `#loadBeanDefinitions(EncodedResource encodedResource)` 方法，执行真正的逻辑实现。
 
-```
+```java
 /**
  * 当前线程，正在加载的 EncodedResource 集合。
  */
@@ -109,44 +107,7 @@ public int loadBeanDefinitions(EncodedResource encodedResource) throws BeanDefin
 }
 ```
 
-- ```
-  <1>
-  ```
-
-   
-
-  处，通过
-
-   
-
-  ```
-  resourcesCurrentlyBeingLoaded.get()
-  ```
-
-   
-
-  代码，来获取已经加载过的资源，然后将
-
-   
-
-  ```
-  encodedResource
-  ```
-
-   
-
-  加入其中，如果
-
-   
-
-  ```
-  resourcesCurrentlyBeingLoaded
-  ```
-
-   
-
-  中已经存在该资源，则抛出 BeanDefinitionStoreException 异常。
-
+- `<1>`处，通过resourcesCurrentlyBeingLoaded.get()代码，来获取已经加载过的资源，然后将encodedResource加入其中，如果resourcesCurrentlyBeingLoaded中已经存在该资源，则抛出 BeanDefinitionStoreException 异常。
   - 为什么需要这么做呢？答案在 `"Detected cyclic loading"` ，避免一个 EncodedResource 在加载时，还没加载完成，又加载自身，从而导致**死循环**。
   - 也因此，在 `<3>` 处，当一个 EncodedResource 加载完成后，需要从缓存中剔除。
 
@@ -154,7 +115,7 @@ public int loadBeanDefinitions(EncodedResource encodedResource) throws BeanDefin
 
 # 2. doLoadBeanDefinitions
 
-```
+```java
 /**
  * Actually load bean definitions from the specified XML file.
  * @param inputSource the SAX InputSource to read from
@@ -201,7 +162,7 @@ protected int doLoadBeanDefinitions(InputSource inputSource, Resource resource)
 
 ## 2.1 doLoadDocument
 
-```
+```java
 /**
  * 获取 XML Document 实例
  *
